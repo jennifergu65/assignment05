@@ -1,0 +1,96 @@
+---
+title: WDI Dataset Analysis
+author: Jennifer Gu
+date: 06/04/2025
+format:
+    revealjs:
+        theme: moon
+bibliography: references.bib
+---
+# Life Expectancy and Health Expenditures
+
+## Life Expectancy and Health Expenditures Graph {data-transition="zoom"}
+
+:::: {.columns}
+
+::: {.column width="45%"}
+Life expectancy generally increases with health expenditures, though plateaus around 9 (health expenditure) at approximately 82 years.
+:::
+
+::: {.column width="5%"}
+
+:::
+
+::: {.column width="50%"}
+```{python}
+#| echo: false
+#| eval: true
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+df = pd.read_csv("wdi.csv")
+
+plt.figure(figsize=(6, 4))
+plt.scatter(df["health_expenditure_gdp_share"], df["life_expectancy"])
+plt.xlabel("Health Expenditure GDP Share")
+plt.ylabel("Life Expectancy")
+plt.title("Life Expectancy vs. Health Expenditure")
+plt.tight_layout()
+plt.show()
+```
+:::
+
+::::
+
+# GDP and Life Expectancy
+
+## GDP and Life Expectancy Graph {data-transition="zoom"}
+
+:::: {.columns}
+
+::: {.column width="45%"}
+The following graph shows that life expectancy increases, on average, with GDP.
+:::
+
+::: {.column width="5%"}
+
+:::
+
+::: {.column width="50%"}
+```{python}
+#| echo: false
+#| eval: true
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+df = pd.read_csv("wdi.csv")
+
+df["gdp_category"] = pd.cut(
+    df["gdp_per_capita"],
+    bins=[-float("inf"), 2000, 14000, float("inf")],
+    labels=["Low", "Middle", "High"]
+)
+
+mean_life_expectancy = df.groupby("gdp_category", observed=False)["life_expectancy"].mean()
+
+plt.figure(figsize=(6, 4))
+plt.bar(mean_life_expectancy.index, mean_life_expectancy.values)
+plt.xlabel("GDP Category")
+plt.ylabel("Mean Life Expectancy")
+plt.title("Mean Life Expectancy by GDP Category")
+plt.show()
+```
+:::
+
+::::
+
+# Conclusion
+
+## Conclusion
+Primary points from this analysis:
+
+- A country's average life exectancy increases with increasing health expenditures.
+
+- A country's average life expectancy increases with increasing GDP.

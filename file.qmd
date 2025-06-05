@@ -1,0 +1,161 @@
+---
+title: WDI Dataset Analysis
+author: Jennifer Gu
+date: 06/04/2025
+format:
+  html: default
+  pdf: default
+bibliography: references.bib
+---
+
+```{python}
+#| echo: false
+#| eval: true
+
+import pandas as pd
+
+df = pd.read_csv("wdi.csv")
+```
+
+# Exploratory Data Analysis
+
+## 1: Life Expectancy Distribution {#sec-life-expectancy}
+
+This graph shows the distribution of life expectancy across countries in 2022. We have a left skewed distribution with a median of around 70-75 years.
+
+```{python}
+#| echo: true
+#| eval: true
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+df = pd.read_csv("wdi.csv")
+
+plt.hist(df["life_expectancy"])
+plt.xlabel("Life Expectancy")
+plt.ylabel("Frequency")
+plt.title("Distribution of Life Expectancy")
+plt.show()
+```
+
+## 2: Frequency of Low, Middle, and High GDP Countries {#sec-gdp-categories}
+
+Now, let's look at GDP. We'll divide countries into the following GDP categories:
+
+- Low: GDP per Capita of less than $2000
+- Middle: GDP per Capita between $2000 and $14000
+- High: GDP per Capita greater than $14000
+
+The resulting frequency table shows that the majority of countries have middle (91) or high (74) GDP. While there aren't as many low (38) GDP countries comparatively, they still make up a signficant amount.
+
+```{python}
+#| echo: true
+#| eval: true
+
+import pandas as pd
+
+df = pd.read_csv("wdi.csv")
+
+df["gdp_category"] = pd.cut(
+    df["gdp_per_capita"],
+    bins=[-float("inf"), 2000, 14000, float("inf")],
+    labels=["Low", "Middle", "High"]
+)
+
+freq_table = df["gdp_category"].value_counts()
+print(freq_table)
+```
+
+### 3: Total Population by GDP Category
+
+This graph shows the distribution of population by GDP Category. The boxplots show that low GDP countries have higher populations thatn middle and high GDP countries. See GDP categories in @sec-gdp-categories.
+
+```{python}
+#| echo: true
+#| eval: true
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+df = pd.read_csv("wdi.csv")
+
+df["gdp_category"] = pd.cut(
+    df["gdp_per_capita"],
+    bins=[-float("inf"), 2000, 14000, float("inf")],
+    labels=["Low", "Middle", "High"]
+)
+
+plt.boxplot([
+    df[df["gdp_category"] == "Low"]["total_population"],
+    df[df["gdp_category"] == "Middle"]["total_population"],
+    df[df["gdp_category"] == "High"]["total_population"]
+], showfliers=False)
+plt.xticks([1, 2, 3], ["Low", "Middle", "High"])
+plt.ylabel("Total Population")
+plt.title("Population Distribution by GDP Category")
+plt.show()
+```
+
+# Data Analysis
+
+## 1: Life Expectancy and Health Expenditures
+
+Life expectancy generally increases with health expenditures, though plateaus around 9 (health expenditure) at approximately 82 years. See life expectancy distribution in @sec-life-expectancy. For research on life expectancy and health expenditures, see this study from the International Information and Engineering Technology Association [@morina2022effect].
+
+```{python}
+#| echo: false
+#| eval: true
+#| fig-cap: Life Exectancy and Health Expenditures GDP Share
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+df = pd.read_csv("wdi.csv")
+
+plt.scatter(df["health_expenditure_gdp_share"], df["life_expectancy"])
+plt.xlabel("Health Expenditure GDP Share")
+plt.ylabel("Life Expectancy")
+plt.title("Life Expectancy vs. Health Expenditure")
+plt.tight_layout()
+plt.show()
+```
+
+## 2: GDP and Life Expectancy
+
+The following graph shows that life expectancy increases, on average, with GDP. See GDP categories in @sec-gdp-categories. For research on GDP and country expenditures, see this study from The Lancet [@shkolnikov2019patterns].
+
+```{python}
+#| echo: false
+#| eval: true
+#| fig-cap: GDP and Country Expenditures
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+df = pd.read_csv("wdi.csv")
+
+df["gdp_category"] = pd.cut(
+    df["gdp_per_capita"],
+    bins=[-float("inf"), 2000, 14000, float("inf")],
+    labels=["Low", "Middle", "High"]
+)
+
+mean_life_expectancy = df.groupby("gdp_category", observed=False)["life_expectancy"].mean()
+
+plt.bar(mean_life_expectancy.index, mean_life_expectancy.values)
+plt.xlabel("GDP Category")
+plt.ylabel("Mean Life Expectancy")
+plt.title("Mean Life Expectancy by GDP Category")
+plt.show()
+```
+
+Data sourced from [World Bank Group](https://databank.worldbank.org/source/world-development-indicators).
+
+# Key Statistics
+
+The following table shows the precise mean life exectancies by GDP category.
+
+| Low      | Middle   | High     |
+|:---------|:--------:|---------:|
+| 62.69    | 70.81    | 79.55    |
